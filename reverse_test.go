@@ -6,13 +6,18 @@ import (
 
 // https://godoc.org/golang.org/x/tools/cmd/benchcmp
 
-func BenchmarkReverseRange(b *testing.B) {
-	var str string = "!oG ,olleH"
+const (
+	TEST_STRING          string = "!oG ,olleH"
+	TEST_STRING_REVERSED string = "Hello, Go!"
+)
 
-	b.SetBytes(int64(len(str)))
+func BenchmarkReverseRange(b *testing.B) {
+	b.SetBytes(int64(len(TEST_STRING)))
 
 	for i := 0; i < b.N; i++ {
-		ReverseRange(str)
+		if r := ReverseRange(TEST_STRING); r != TEST_STRING_REVERSED {
+			b.Errorf("result(%v) != TEST_STRING_REVERSED(%v)\n", r, TEST_STRING_REVERSED)
+		}
 	}
 
 	//enable allocs report for a single test
@@ -22,36 +27,53 @@ func BenchmarkReverseRange(b *testing.B) {
 
 // ~15% faster
 func BenchmarkReverseConvert(b *testing.B) {
-	var str string = "!oG ,olleH"
-
-	b.SetBytes(int64(len(str)))
+	b.SetBytes(int64(len(TEST_STRING)))
 
 	for i := 0; i < b.N; i++ {
-		ReverseConvert(str)
+		if r := ReverseConvert(TEST_STRING); r != TEST_STRING_REVERSED {
+			b.Errorf("result(%v) != TEST_STRING_REVERSED(%v)\n", r, TEST_STRING_REVERSED)
+		}
+	}
+}
+
+// trash, this solution is mostly for education purposes
+func BenchmarkReverseDeferred(b *testing.B) {
+	b.SetBytes(int64(len(TEST_STRING)))
+
+	for i := 0; i < b.N; i++ {
+		if r := ReverseDeferred(TEST_STRING); r != TEST_STRING_REVERSED {
+			b.Errorf("result(%v) != TEST_STRING_REVERSED(%v)\n", r, TEST_STRING_REVERSED)
+		}
 	}
 }
 
 func BenchmarkParallelReverseRange(b *testing.B) {
-	var str string = "!oG ,olleH"
-
-	b.SetBytes(int64(len(str)))
+	b.SetBytes(int64(len(TEST_STRING)))
 
 	// -cpu 4
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			ReverseRange(str)
+			ReverseRange(TEST_STRING)
 		}
 	})
 }
 
 func BenchmarkParallelReverseConvert(b *testing.B) {
-	var str string = "!oG ,olleH"
-
-	b.SetBytes(int64(len(str)))
+	b.SetBytes(int64(len(TEST_STRING)))
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			ReverseConvert(str)
+			ReverseConvert(TEST_STRING)
+		}
+	})
+}
+
+func BenchmarkParallelReverseDeferred(b *testing.B) {
+	b.SetBytes(int64(len(TEST_STRING)))
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			ReverseDeferred(TEST_STRING)
 		}
 	})
 }
