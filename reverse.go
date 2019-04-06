@@ -33,5 +33,5 @@ func ReverseDeferred(s string) (out string) {
 		defer func(r rune) { out += string(r) }(v)
 	}
 
-	return out
+	return
 }
